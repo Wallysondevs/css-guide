@@ -1,185 +1,349 @@
 import { PageContainer } from "@/components/layout/PageContainer";
 import { CodeBlock } from "@/components/ui/CodeBlock";
 import { AlertBox } from "@/components/ui/AlertBox";
+import { VisualDemo } from "@/components/ui/VisualDemo";
+import { BeforeAfter } from "@/components/ui/BeforeAfter";
 
 export default function Seletores() {
   return (
     <PageContainer
       title="Seletores"
-      subtitle="A linguagem de busca do CSS: como mirar um, vários ou exatamente um elemento numa página inteira sem tocar no HTML."
+      subtitle="Antes de estilizar, você precisa apontar PARA O QUÊ. Seletores são o jeito de dizer 'todos os botões', 'os links que estão dentro de um menu', 'os campos preenchidos errado'. Vamos do básico ao avançado."
       difficulty="iniciante"
-      timeToRead="12 min"
+      timeToRead="13 min"
     >
-      <h2>Tipos básicos</h2>
-      <CodeBlock
-        language="css"
-        code={`/* Universal — todos os elementos */
-* { box-sizing: border-box; }
+      <h2>A analogia: organizar uma lista de presença</h2>
+      <p>
+        Imagine que você precisa marcar pessoas numa sala. Pode dizer:
+        "todo mundo de azul" (classe), "a Ana especificamente" (ID),
+        "qualquer pessoa de óculos" (atributo), "as crianças que estão
+        sentadas" (estado). Seletores funcionam assim: cada um é uma
+        forma diferente de filtrar elementos da página.
+      </p>
 
-/* Tipo (tag) */
-h1 { font-size: 2rem; }
+      <h2>Os 4 jeitos básicos de mirar</h2>
+      <VisualDemo
+        title="Por tag, classe, ID e atributo"
+        code={`/* Por TAG (todos os <button>) */
+button { background: #3b82f6; color: white; }
 
-/* Classe */
-.btn { padding: .5rem 1rem; }
+/* Por CLASSE (qualquer elemento com class="primario") */
+.primario { background: #ef4444; }
 
-/* ID — específico, evite usar para estilo */
-#header { position: sticky; top: 0; }
+/* Por ID (UM elemento específico) */
+#confirmar { background: #10b981; }
 
-/* Atributo */
-[type="email"] { background: #fffbe6; }
-[href^="https"] { color: green; }       /* começa com */
-[href$=".pdf"]  { color: red; }         /* termina com */
-[class*="card"] { border-radius: .5rem; }/* contém */
-[lang|="pt"]    { font-style: italic; } /* pt ou pt-BR */
-[data-status~="ativo"] { /* palavra na lista */ }`}
+/* Por ATRIBUTO */
+[disabled] { opacity: .5; cursor: not-allowed; }`}
+        preview={
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {(
+              [
+                { label: "tag", bg: "#3b82f6" },
+                { label: "classe", bg: "#ef4444" },
+                { label: "id", bg: "#10b981" },
+                { label: "atributo", bg: "#cbd5e1", style: { opacity: 0.5, cursor: "not-allowed", color: "#1e293b" } as any },
+              ] as const
+            ).map((b) => (
+              <button
+                key={b.label}
+                style={{
+                  background: b.bg,
+                  color: "white",
+                  padding: "8px 14px",
+                  border: 0,
+                  borderRadius: 6,
+                  fontWeight: 600,
+                  fontSize: 13,
+                  ...((b as any).style || {}),
+                }}
+              >
+                {b.label}
+              </button>
+            ))}
+          </div>
+        }
       />
 
-      <h2>Combinadores</h2>
+      <AlertBox type="warning" title="Use classes — quase sempre">
+        IDs têm prioridade altíssima e ficam difíceis de sobrescrever
+        depois. <strong>Regra de ouro:</strong> ID só pra âncora
+        (<code>href="#topo"</code>) ou JavaScript. Para estilo, use
+        classe.
+      </AlertBox>
+
+      <h2>Combinadores: navegando entre elementos</h2>
       <CodeBlock
         language="css"
         code={`/* Descendente — qualquer nível abaixo */
-nav a { color: blue; }
+nav a            { color: blue; }   /* qualquer <a> dentro de <nav> */
 
-/* Filho direto > */
-nav > a { font-weight: bold; }
+/* Filho direto > — só descendente imediato */
+nav > a          { font-weight: bold; }
 
-/* Irmão adjacente + (próximo irmão) */
-h2 + p { margin-top: 0; }
+/* Próximo irmão + */
+h2 + p           { margin-top: 0; }  /* o p logo após h2 */
 
-/* Irmão geral ~ (todos os irmãos depois) */
-h2 ~ p { color: #555; }
+/* Todos os irmãos depois ~ */
+h2 ~ p           { color: gray; }    /* todos os p depois do h2 */
 
-/* Lista (vírgula) — vários alvos */
-h1, h2, h3 { font-family: serif; }`}
+/* Vários alvos (vírgula) */
+h1, h2, h3       { font-family: serif; }`}
       />
 
-      <h2>Pseudo-classes essenciais</h2>
+      <h2>Pseudo-classes: estados do elemento</h2>
+      <p>
+        Pseudo-classes começam com <code>:</code> e descrevem
+        <strong> em que estado</strong> o elemento está agora.
+      </p>
+
+      <VisualDemo
+        title="Hover e focus em ação — passe o mouse / clique no input"
+        code={`.btn { background: #3b82f6; transition: background .2s; }
+.btn:hover { background: #1d4ed8; }     /* mouse em cima */
+
+.input { border: 2px solid #cbd5e1; }
+.input:focus { outline: 0; border-color: #3b82f6; }`}
+        preview={
+          <div style={{ display: "flex", gap: 12 }}>
+            <button
+              style={{
+                background: "#3b82f6",
+                color: "white",
+                padding: "10px 16px",
+                border: 0,
+                borderRadius: 6,
+                fontWeight: 600,
+                cursor: "pointer",
+                transition: "background .2s",
+              }}
+              onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.background = "#1d4ed8")}
+              onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.background = "#3b82f6")}
+            >
+              Passe o mouse
+            </button>
+            <input
+              placeholder="Clique aqui"
+              style={{
+                padding: "10px 12px",
+                border: "2px solid #cbd5e1",
+                borderRadius: 6,
+                fontSize: 13,
+              }}
+            />
+          </div>
+        }
+      />
+
+      <h2>Pseudo-classes mais úteis no dia a dia</h2>
       <CodeBlock
         language="css"
-        code={`/* Estado de interação */
-a:hover { text-decoration: underline; }
+        code={`/* Estados de interação */
+a:hover     { text-decoration: underline; }
 button:active { transform: scale(.97); }
 input:focus { outline: 2px solid blue; }
-input:focus-visible { /* só com teclado */ }
+input:focus-visible { /* só se foi focado pelo TECLADO */ }
 button:disabled { opacity: .5; }
 
-/* Posição estrutural */
-li:first-child { font-weight: bold; }
-li:last-child { border-bottom: none; }
-li:nth-child(odd) { background: #f9f9f9; }
-li:nth-child(3n+1) { color: red; }
-p:only-child { /* único filho do pai */ }
-:empty { display: none; }
+/* Posição entre irmãos */
+li:first-child  { font-weight: bold; }
+li:last-child   { border-bottom: none; }
+li:nth-child(odd)  { background: #f9f9f9; }   /* zebra */
+li:nth-child(3n+1) { color: red; }            /* a cada 3, começando no 1 */
 
-/* Validação de formulário */
+/* Validação de form */
 input:required { border-color: orange; }
-input:valid { border-color: green; }
-input:invalid:not(:placeholder-shown) { border-color: red; }
-input:placeholder-shown { color: #999; }
-
-/* Modernos (2023+) */
-form:has(input:invalid) button { opacity: .5; }
-:is(h1, h2, h3) { line-height: 1.2; }
-:where(article, section) p { margin: 1em 0; }
-:not(.btn-primary) { opacity: .8; }`}
+input:valid    { border-color: green; }
+input:invalid  { border-color: red; }
+input:placeholder-shown { color: #999; }      /* ainda vazio */`}
       />
 
-      <h2>Pseudo-elementos</h2>
-      <CodeBlock
-        language="css"
-        code={`/* Notação :: distingue de pseudo-classes */
-p::first-line { font-weight: bold; }
-p::first-letter { font-size: 2em; float: left; }
-
-/* Conteúdo gerado */
-.note::before { content: "📌 "; }
-.note::after  { content: " ←"; }
-
-/* Marcadores de lista */
-li::marker { color: purple; font-weight: bold; }
-
-/* Texto selecionado */
-::selection { background: yellow; color: black; }
-
-/* Placeholder de input */
-input::placeholder { color: #aaa; }
-
-/* Detalhe de <details> aberto/fechado */
-summary::marker { color: red; }`}
+      <h2>Exemplo do mundo real: tabela com listras</h2>
+      <VisualDemo
+        title="Linhas alternadas com nth-child(even)"
+        code={`tbody tr:nth-child(even) {
+  background: #f8fafc;
+}`}
+        preview={
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+            <thead>
+              <tr style={{ background: "#1e293b", color: "white" }}>
+                <th style={{ padding: 8, textAlign: "left" }}>Produto</th>
+                <th style={{ padding: 8, textAlign: "right" }}>Preço</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                ["Camiseta", "R$ 49"],
+                ["Tênis", "R$ 299"],
+                ["Boné", "R$ 39"],
+                ["Mochila", "R$ 159"],
+              ].map(([p, v], i) => (
+                <tr key={p} style={{ background: i % 2 ? "#f8fafc" : "white" }}>
+                  <td style={{ padding: 8 }}>{p}</td>
+                  <td style={{ padding: 8, textAlign: "right" }}>{v}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        }
       />
 
-      <h2>:is(), :where() e :has()</h2>
-      <CodeBlock
-        language="css"
-        code={`/* :is() — agrupa, mas usa a maior especificidade interna */
-:is(article, section, aside) h2 { font-size: 1.5rem; }
-/* Equivale a article h2, section h2, aside h2 */
+      <h2>:has() — o "sou pai de…"</h2>
+      <p>
+        Por 25 anos, CSS não conseguia dizer "estilize o card que
+        tem uma imagem dentro". Em 2023 chegou o <code>:has()</code> e
+        mudou tudo:
+      </p>
 
-/* :where() — IDÊNTICO, mas com especificidade ZERO */
-:where(article, section, aside) h2 { font-size: 1.5rem; }
-/* Útil em "reset" libraries: você pode sobrescrever facilmente */
-
-/* :has() — o "parent selector" que existiu por 25 anos só em sonho */
-article:has(img) { padding: 1rem; }
-form:has(input:invalid) { border-color: red; }
-.card:has(> h2 + p) { /* card com h2 seguido de p */ }
-li:has(+ li) { border-bottom: 1px solid #eee; }   /* todos menos o último */`}
+      <BeforeAfter
+        beforeLabel="❌ Sem :has() — todos iguais"
+        afterLabel="✅ Com :has(img) — destaca os com foto"
+        before={
+          <div style={{ display: "grid", gap: 8 }}>
+            {["Card sem foto", "Card sem foto", "Card sem foto"].map((t, i) => (
+              <div
+                key={i}
+                style={{
+                  padding: 10,
+                  border: "1px solid #cbd5e1",
+                  borderRadius: 6,
+                  fontSize: 12,
+                }}
+              >
+                {t}
+              </div>
+            ))}
+          </div>
+        }
+        after={
+          <div style={{ display: "grid", gap: 8 }}>
+            <div
+              style={{
+                padding: 10,
+                border: "2px solid #3b82f6",
+                borderRadius: 6,
+                fontSize: 12,
+                background: "#dbeafe",
+                display: "flex",
+                gap: 8,
+                alignItems: "center",
+              }}
+            >
+              <div
+                style={{
+                  width: 32,
+                  height: 32,
+                  background: "linear-gradient(135deg,#fbbf24,#ef4444)",
+                  borderRadius: 4,
+                }}
+              />
+              Card COM foto
+            </div>
+            <div style={{ padding: 10, border: "1px solid #cbd5e1", borderRadius: 6, fontSize: 12 }}>
+              Card sem foto
+            </div>
+          </div>
+        }
       />
 
-      <h2>Casos práticos</h2>
       <CodeBlock
         language="css"
-        code={`/* Linhas zebradas em tabela */
-tbody tr:nth-child(even) { background: #f5f5f5; }
-
-/* Primeiro parágrafo de um artigo destacado */
-article > p:first-of-type { font-size: 1.2em; }
-
-/* Skeleton enquanto carrega (sem JS) */
-.card[data-loading="true"] { opacity: .4; pointer-events: none; }
-
-/* Sublinhar links externos */
-a[href^="http"]:not([href*="meusite.com"])::after {
-  content: " ↗";
+        code={`/* Estilizar o pai baseado no que ele CONTÉM */
+.card:has(img) {
+  border: 2px solid blue;
+  background: #eff6ff;
 }
 
-/* Form com erro (parent selector via :has) */
-.field:has(input:invalid:not(:placeholder-shown)) label {
-  color: red;
-}`}
+/* Form com qualquer input inválido — desabilita o submit */
+form:has(input:invalid) button[type="submit"] {
+  opacity: .5;
+  pointer-events: none;
+}
+
+/* Body trava scroll quando modal está aberto (substitui JS) */
+body:has(dialog[open]) { overflow: hidden; }`}
+      />
+
+      <h2>Pseudo-elementos: criando "partes" do elemento</h2>
+      <p>
+        Começam com <code>::</code> (duplo) e estilizam pedaços virtuais
+        — primeira letra, primeira linha, marker de lista, etc.
+      </p>
+
+      <VisualDemo
+        code={`p::first-letter { font-size: 2.4em; font-weight: 800; color: #ea580c; float: left; padding-right: 6px; }
+::selection { background: #fde047; color: #422006; }`}
+        preview={
+          <p style={{ fontSize: 14, lineHeight: 1.5, margin: 0 }}>
+            <span style={{ fontSize: "2.4em", fontWeight: 800, color: "#ea580c", float: "left", paddingRight: 6, lineHeight: 1 }}>
+              E
+            </span>
+            ra uma vez um parágrafo com letra capitular. Tente
+            selecionar este texto e veja a cor do destaque.
+          </p>
+        }
+      />
+
+      <h2>Cuidado com a especificidade</h2>
+      <p>
+        Cada tipo de seletor "vale" um peso diferente. Quando duas
+        regras conflitam, ganha quem tiver maior peso:
+      </p>
+      <CodeBlock
+        language="css"
+        code={`/* Peso (pense como contagem de pontos) */
+*           /* 0 pontos — universal */
+button      /* 1 ponto — tag */
+.btn        /* 10 pontos — classe */
+[type=text] /* 10 pontos — atributo */
+:hover      /* 10 pontos — pseudo-classe */
+#confirma   /* 100 pontos — id */
+style="..." /* 1000 pontos — inline */
+!important  /* trump card, vence tudo do mesmo nível */`}
       />
 
       <h2>Armadilhas comuns</h2>
-      <AlertBox type="warning" title="ID em CSS é quase sempre um erro">
-        IDs têm especificidade altíssima (100). Uma classe sobrescrever
-        um ID exige <code>!important</code>. Use IDs apenas para
-        âncoras (<code>href="#sec"</code>) ou JS, nunca para estilo.
-      </AlertBox>
-
       <AlertBox type="warning" title=":nth-child vs :nth-of-type">
-        <code>p:nth-child(2)</code> = "o segundo filho, se for p".
+        <code>p:nth-child(2)</code> = "o segundo filho, SE for p". Se o
+        segundo filho for um div, não pega ninguém.<br />
         <code>p:nth-of-type(2)</code> = "o segundo p entre os irmãos".
-        Confundir os dois é a causa #1 de "minha regra não pega".
+        Confundir os dois é o bug nº 1 de "minha regra não pega".
       </AlertBox>
 
-      <AlertBox type="danger" title=":has() pode ser pesado">
-        Em árvores grandes, <code>:has()</code> recalcula em mudanças
-        de subárvore. Evite em seletores universais como
-        <code> *:has(.x)</code> ou em listas com milhares de itens.
+      <AlertBox type="danger" title=":has() pode pesar">
+        Em listas com milhares de itens ou seletores universais
+        (<code>*:has(.x)</code>), o navegador precisa re-avaliar a cada
+        mudança. Use com moderação em árvores grandes.
       </AlertBox>
 
-      <h2>Cheat sheet</h2>
+      <h2>Resumão</h2>
       <CodeBlock
         language="css"
-        code={`/* Especificidade rápida */
-*           /* 0,0,0 */
-h1          /* 0,0,1 */
-.btn        /* 0,1,0 */
-a:hover     /* 0,1,1 */
-[type=text] /* 0,1,0 */
-#main       /* 1,0,0 */
-inline=""   /* 1,0,0,0 */
-!important  /* vence tudo (use com parcimônia) */`}
+        code={`/* Básicos */
+button   /* tag */
+.classe  /* classe — use SEMPRE que puder */
+#id      /* só pra âncora ou JS */
+[attr]   /* atributo */
+
+/* Combinadores */
+A B   /* descendente */
+A > B /* filho direto */
+A + B /* irmão imediato */
+A, B  /* vários alvos */
+
+/* Estados úteis */
+:hover  :focus  :focus-visible  :disabled
+:first-child  :nth-child(odd)
+:required  :valid  :invalid
+
+/* Modernos */
+:is(h1, h2, h3)         /* agrupar */
+:where(...)             /* agrupar com peso 0 */
+parent:has(img)         /* selecionar pai pelo filho */
+
+/* Pseudo-elementos (::) */
+::before  ::after  ::first-letter  ::selection  ::placeholder`}
       />
     </PageContainer>
   );

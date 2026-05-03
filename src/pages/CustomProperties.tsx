@@ -1,21 +1,23 @@
 import { PageContainer } from "@/components/layout/PageContainer";
 import { CodeBlock } from "@/components/ui/CodeBlock";
 import { AlertBox } from "@/components/ui/AlertBox";
+import { VisualDemo } from "@/components/ui/VisualDemo";
+import { BeforeAfter } from "@/components/ui/BeforeAfter";
 
 export default function CustomProperties() {
   return (
     <PageContainer
-      title="Custom Properties (CSS Variables)"
-      subtitle="Variáveis NATIVAS do CSS, com escopo, herança e atualização em tempo real via JavaScript. Mais poderosas que variáveis de Sass — porque vivem no runtime."
-      difficulty="intermediario"
+      title="Custom Properties (Variáveis CSS)"
+      subtitle="Variáveis NATIVAS do CSS — não precisam de Sass nem build step. Vivem no navegador, herdam pela árvore, mudam com JavaScript em tempo real. Base de qualquer design system moderno."
+      difficulty="iniciante"
       timeToRead="9 min"
     >
       <h2>Sintaxe básica</h2>
       <CodeBlock
         language="css"
-        code={`/* Definir — sempre prefixo "--" */
+        code={`/* Definir — sempre começa com -- */
 :root {
-  --brand: oklch(60% 0.20 250);
+  --brand: #3b82f6;
   --space-3: 1rem;
   --radius: .5rem;
 }
@@ -28,164 +30,194 @@ export default function CustomProperties() {
 }
 
 /* Fallback (segundo argumento) */
-.btn { background: var(--brand, royalblue); }
-.btn { color: var(--text-color, var(--brand, black)); }`}
+.btn { background: var(--brand, royalblue); }`}
       />
 
-      <AlertBox type="info" title="Custom Properties ≠ Sass variables">
-        <ul>
-          <li><strong>Sass</strong>: compila para valores fixos. Não acessível em runtime.</li>
-          <li><strong>CSS</strong>: vivem no runtime. Mudam com media query, JS, classes, etc.</li>
-          <li><strong>CSS</strong> herdam pelo DOM (cascade nativo).</li>
-          <li><strong>CSS</strong> têm escopo por seletor — não é apenas global.</li>
-        </ul>
-      </AlertBox>
-
-      <h2>Escopo e herança</h2>
-      <CodeBlock
-        language="css"
-        code={`/* Global */
-:root { --brand: blue; }
-
-/* Escopo de componente */
-.card {
-  --brand: red;             /* só dentro de .card e seus filhos */
-  background: var(--brand); /* red */
-}
-
-.card .btn {
-  background: var(--brand); /* red — herdou do .card */
-}
-
-/* Sobrescrever por estado */
-.card[data-variant="success"] {
-  --brand: green;
-}`}
-      />
-
-      <h2>Tema dark/light com 1 variável</h2>
-      <CodeBlock
-        language="css"
+      <h2>O melhor caso: tema dark com 1 toggle</h2>
+      <VisualDemo
+        title="Apenas mude o data-theme do html"
         code={`:root {
   --bg: white;
   --fg: black;
-  --border: #eee;
 }
-
 [data-theme="dark"] {
-  --bg: #1a1a1a;
+  --bg: #0f172a;
   --fg: #fafafa;
-  --border: #333;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #1a1a1a;
-    --fg: #fafafa;
-    --border: #333;
-  }
 }
 
 body { background: var(--bg); color: var(--fg); }`}
+        preview={
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div
+              style={{
+                background: "white",
+                color: "#0f172a",
+                padding: 16,
+                borderRadius: 8,
+                border: "1px solid #e5e7eb",
+                fontSize: 13,
+              }}
+            >
+              <strong>Tema light</strong>
+              <p style={{ margin: "4px 0 0", color: "#64748b" }}>conteúdo de exemplo</p>
+            </div>
+            <div
+              style={{
+                background: "#0f172a",
+                color: "#fafafa",
+                padding: 16,
+                borderRadius: 8,
+                border: "1px solid #1e293b",
+                fontSize: 13,
+              }}
+            >
+              <strong>Tema dark</strong>
+              <p style={{ margin: "4px 0 0", color: "#94a3b8" }}>conteúdo de exemplo</p>
+            </div>
+          </div>
+        }
       />
 
-      <h2>Variáveis em valores parciais</h2>
+      <h2>Variáveis vivem no navegador (Sass não)</h2>
+      <BeforeAfter
+        beforeLabel="Sass — congelado em build time"
+        afterLabel="CSS — muda em runtime"
+        before={
+          <pre className="text-xs text-slate-700 leading-relaxed">
+            {`$brand: blue;
+
+.btn { background: $brand; }
+
+// pra mudar:
+// recompila tudo`}
+          </pre>
+        }
+        after={
+          <pre className="text-xs text-slate-700 leading-relaxed">
+            {`:root { --brand: blue; }
+
+.btn { background: var(--brand); }
+
+/* JS muda em tempo real: */
+root.style
+  .setProperty('--brand', 'red');`}
+          </pre>
+        }
+      />
+
+      <h2>Escopo: variáveis seguem a árvore HTML</h2>
+      <VisualDemo
+        title="Sobrescrever uma variável só dentro de um componente"
+        code={`:root { --brand: blue; }
+
+.card-success {
+  --brand: green;     /* só dentro deste card */
+}
+.card-success .btn {
+  background: var(--brand);   /* green */
+}`}
+        preview={
+          <div style={{ display: "flex", gap: 8 }}>
+            <button
+              style={{
+                background: "#3b82f6",
+                color: "white",
+                padding: "8px 14px",
+                border: 0,
+                borderRadius: 6,
+                fontSize: 13,
+                fontWeight: 600,
+              }}
+            >
+              padrão
+            </button>
+            <button
+              style={{
+                background: "#10b981",
+                color: "white",
+                padding: "8px 14px",
+                border: 0,
+                borderRadius: 6,
+                fontSize: 13,
+                fontWeight: 600,
+              }}
+            >
+              .card-success
+            </button>
+          </div>
+        }
+      />
+
+      <h2>Padrão "API de componente" (avançado mas vale ouro)</h2>
+      <VisualDemo
+        title="Componente expõe variáveis pra customização"
+        code={`.card {
+  --card-bg: white;
+  --card-padding: 1.5rem;
+  --card-radius: .75rem;
+
+  background: var(--card-bg);
+  padding: var(--card-padding);
+  border-radius: var(--card-radius);
+}
+
+/* Customiza sem sobrescrever as propriedades inteiras */
+.card.compact { --card-padding: .75rem; --card-radius: .25rem; }
+.card.featured {
+  --card-bg: linear-gradient(135deg, #fbbf24, #ef4444);
+}`}
+        preview={
+          <div style={{ display: "grid", gap: 8 }}>
+            <div
+              style={{
+                background: "white",
+                padding: "1.5rem",
+                borderRadius: ".75rem",
+                border: "1px solid #e5e7eb",
+                fontSize: 13,
+                color: "#0f172a",
+              }}
+            >
+              .card padrão
+            </div>
+            <div
+              style={{
+                background: "white",
+                padding: ".75rem",
+                borderRadius: ".25rem",
+                border: "1px solid #e5e7eb",
+                fontSize: 13,
+                color: "#0f172a",
+              }}
+            >
+              .card.compact
+            </div>
+            <div
+              style={{
+                background: "linear-gradient(135deg,#fbbf24,#ef4444)",
+                padding: "1.5rem",
+                borderRadius: ".75rem",
+                fontSize: 13,
+                color: "white",
+                fontWeight: 700,
+              }}
+            >
+              .card.featured
+            </div>
+          </div>
+        }
+      />
+
+      <h2>Sistema de tokens — o jeito profissional</h2>
       <CodeBlock
         language="css"
-        code={`/* Compor cores via canais separados */
-:root {
-  --brand-h: 250;
-  --brand-s: 100%;
-  --brand-l: 50%;
-}
-
-.btn {
-  background: hsl(var(--brand-h) var(--brand-s) var(--brand-l));
-}
-
-.btn:hover {
-  /* só muda a luminosidade — sem precisar de outra cor inteira */
-  background: hsl(var(--brand-h) var(--brand-s) calc(var(--brand-l) - 10%));
-}
-
-/* Spacing scale via multiplicador */
-:root { --space-base: 0.25rem; }
-.p-1 { padding: calc(var(--space-base) * 1); }   /* 0.25rem */
-.p-4 { padding: calc(var(--space-base) * 4); }   /* 1rem */
-.p-8 { padding: calc(var(--space-base) * 8); }   /* 2rem */`}
-      />
-
-      <h2>Manipular via JavaScript</h2>
-      <CodeBlock
-        language="js"
-        code={`// Ler
-const root = document.documentElement;
-const brand = getComputedStyle(root).getPropertyValue('--brand').trim();
-
-// Escrever
-root.style.setProperty('--brand', 'hotpink');
-
-// Remover (volta ao default)
-root.style.removeProperty('--brand');
-
-// Caso clássico: theme switcher persistente
-const setTheme = (theme) => {
-  document.documentElement.dataset.theme = theme;
-  localStorage.setItem('theme', theme);
-};
-
-// Cursor seguindo o mouse via variáveis
-document.addEventListener('mousemove', e => {
-  document.body.style.setProperty('--mx', e.clientX + 'px');
-  document.body.style.setProperty('--my', e.clientY + 'px');
-});`}
-      />
-
-      <h2>@property — variáveis tipadas (com animação!)</h2>
-      <p>
-        Custom properties normais são tratadas como string — não
-        animam. Com <code>@property</code>, você declara o tipo e o
-        browser anima entre valores.
-      </p>
-
-      <CodeBlock
-        language="css"
-        code={`/* Registrar tipo */
-@property --gradient-angle {
-  syntax: "<angle>";
-  initial-value: 0deg;
-  inherits: false;
-}
-
-@keyframes spin-gradient {
-  to { --gradient-angle: 360deg; }
-}
-
-.card {
-  background: conic-gradient(
-    from var(--gradient-angle),
-    blue, red, blue
-  );
-  animation: spin-gradient 4s linear infinite;
-}
-
-/* Tipos suportados:
-   <color>, <length>, <percentage>, <number>, <integer>, <angle>,
-   <time>, <length-percentage>, <image>, <url>, <transform-function>,
-   <transform-list>, <custom-ident>  */`}
-      />
-
-      <h2>Casos práticos</h2>
-      <CodeBlock
-        language="css"
-        code={`/* Sistema de design tokens completo */
-:root {
-  /* Primitivos */
+        code={`:root {
+  /* Primitivos (a paleta crua) */
   --gray-50:  oklch(98% 0 0);
   --gray-900: oklch(15% 0 0);
   --blue-500: oklch(60% 0.18 250);
 
-  /* Semânticos (referência) */
+  /* Semânticos (uso prático) */
   --color-bg:        var(--gray-50);
   --color-text:      var(--gray-900);
   --color-primary:   var(--blue-500);
@@ -198,82 +230,86 @@ document.addEventListener('mousemove', e => {
   --space-5: 2rem;
 
   /* Tipografia */
-  --fs-sm: 0.875rem;
+  --fs-sm: .875rem;
   --fs-md: 1rem;
   --fs-lg: 1.25rem;
 
-  /* Raio, sombras, transições */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.5rem;
+  /* Outros */
+  --radius-md: .5rem;
   --shadow-md: 0 4px 12px rgb(0 0 0 / .08);
   --transition: 200ms cubic-bezier(.4, 0, .2, 1);
-}
-
-/* Componente usando só tokens */
-.btn {
-  background: var(--color-primary);
-  color: white;
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-md);
-  font-size: var(--fs-md);
-  transition: transform var(--transition);
-}
-
-/* Configuração por instância via CSS API */
-.btn-lg { --fs-md: var(--fs-lg); --space-2: var(--space-3); }`}
+}`}
       />
 
-      <h2>Padrão "API de componente"</h2>
+      <h2>Manipular via JavaScript</h2>
+      <CodeBlock
+        language="js"
+        code={`const root = document.documentElement;
+
+// Ler
+const brand = getComputedStyle(root)
+  .getPropertyValue('--brand').trim();
+
+// Escrever
+root.style.setProperty('--brand', 'hotpink');
+
+// Remover (volta ao padrão)
+root.style.removeProperty('--brand');
+
+// Caso clássico: theme switcher
+const setTheme = (t) => {
+  document.documentElement.dataset.theme = t;
+  localStorage.setItem('theme', t);
+};
+
+// Cursor seguindo o mouse via variável
+document.addEventListener('mousemove', e => {
+  document.body.style.setProperty('--mx', e.clientX + 'px');
+  document.body.style.setProperty('--my', e.clientY + 'px');
+});`}
+      />
+
+      <h2>@property — variáveis tipadas (que animam!)</h2>
+      <p>
+        Custom properties normais são tratadas como string e <strong>não
+        animam</strong>. Com <code>@property</code>, você diz o tipo e
+        o navegador anima entre valores — abre portas pra efeitos
+        impossíveis antes.
+      </p>
+
       <CodeBlock
         language="css"
-        code={`/* Componente expõe variáveis para customização */
+        code={`@property --gradient-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes spin-gradient {
+  to { --gradient-angle: 360deg; }
+}
+
 .card {
-  --card-bg: white;
-  --card-border: #eee;
-  --card-padding: 1.5rem;
-  --card-radius: .75rem;
-
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  padding: var(--card-padding);
-  border-radius: var(--card-radius);
-}
-
-/* Uso: customiza sem sobrescrever as propriedades inteiras */
-.card.featured {
-  --card-bg: linear-gradient(45deg, #ff6b00, #ffcc00);
-  --card-border: transparent;
-}
-
-.card.compact {
-  --card-padding: .75rem;
-  --card-radius: .25rem;
+  background: conic-gradient(from var(--gradient-angle), blue, red, blue);
+  animation: spin-gradient 4s linear infinite;
 }`}
       />
 
       <h2>Armadilhas comuns</h2>
-      <AlertBox type="warning" title="var() não é universal">
-        <code>var(--cor)</code> só funciona DENTRO de uma propriedade.
-        Não em <code>@media</code>, <code>@supports</code> ou
-        <code> calc() </code> sem operação. Para valores literais
-        em queries, use <code>env()</code> ou prepare múltiplas
-        declarações.
+      <AlertBox type="warning" title="Fallback inválido descarta a propriedade inteira">
+        <code>color: var(--x, abc)</code> com <code>--x</code> indefinido
+        vira <code>color: abc</code> — inválido — e a propriedade
+        inteira é ignorada (volta a herdar). Sempre forneça um fallback
+        válido.
       </AlertBox>
 
-      <AlertBox type="danger" title="Fallback inválido = propriedade inválida">
-        <code>color: var(--x, abc)</code> com <code>--x</code> não
-        definida resulta em <code>color: abc</code>, que é inválido,
-        e a propriedade INTEIRA é descartada (volta ao herdado).
-        Sempre garanta um fallback válido.
+      <AlertBox type="warning" title="var() não funciona em @media">
+        <code>@media (min-width: var(--mq))</code> NÃO funciona. Pra
+        valores literais em queries, declare múltiplas regras ou use
+        <code> env() </code> (limitado).
       </AlertBox>
 
-      <AlertBox type="warning" title="Performance em larga escala">
-        Mudar uma variável em <code>:root</code> recalcula TODOS os
-        descendentes que a usam. Em 10.000 elementos, pode causar
-        jank. Use escopo mais restrito quando possível.
-      </AlertBox>
-
-      <h2>Cheat sheet</h2>
+      <h2>Resumão</h2>
       <CodeBlock
         language="css"
         code={`:root { --brand: blue; }
@@ -291,7 +327,7 @@ color: var(--brand, fallback)
 el.style.setProperty('--brand', 'red')
 getComputedStyle(el).getPropertyValue('--brand').trim()
 
-/* Padrão "componente API" */
+/* Padrão "API de componente" */
 .card { --pad: 1rem; padding: var(--pad); }
 .card.compact { --pad: .5rem; }`}
       />

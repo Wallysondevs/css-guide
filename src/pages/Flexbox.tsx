@@ -1,237 +1,415 @@
 import { PageContainer } from "@/components/layout/PageContainer";
 import { CodeBlock } from "@/components/ui/CodeBlock";
 import { AlertBox } from "@/components/ui/AlertBox";
+import { VisualDemo } from "@/components/ui/VisualDemo";
+import { BeforeAfter } from "@/components/ui/BeforeAfter";
+import { FlexAxesDiagram } from "@/components/ui/Diagrams";
+
+const item = (n: number, c = "#3b82f6") => ({
+  background: c,
+  color: "white",
+  padding: "10px 14px",
+  borderRadius: 6,
+  fontSize: 13,
+  fontWeight: 600,
+  textAlign: "center" as const,
+});
 
 export default function Flexbox() {
   return (
     <PageContainer
       title="Flexbox"
-      subtitle="O sistema de layout 1D do CSS: alinha e distribui itens em uma linha ou coluna. Domínio obrigatório para qualquer componente moderno."
-      difficulty="intermediario"
-      timeToRead="12 min"
+      subtitle="O jeito mais simples de alinhar coisas em CSS. Pense numa fila do banco: você decide a ordem, o espaço entre as pessoas, e quem fica no canto. É isso que Flexbox faz com seus elementos."
+      difficulty="iniciante"
+      timeToRead="13 min"
     >
-      <h2>Conceitos: container e items</h2>
-      <CodeBlock
-        language="css"
-        code={`.container {
-  display: flex;          /* ou inline-flex */
-  /* TUDO o que vem a seguir é PROPRIEDADE do container */
-}
-
-.container > .item {
-  /* PROPRIEDADES do item */
-}`}
-      />
-
-      <h2>Eixos: main e cross</h2>
+      <h2>A analogia: organizando um aperitivo na bandeja</h2>
+      <p>
+        Imagine que você tem uma bandeja (o <strong>container</strong>) e
+        vai colocar petiscos nela (os <strong>itens</strong>). Você decide:
+      </p>
       <ul>
-        <li><strong>Main axis</strong> — direção dos itens. Por padrão horizontal (row).</li>
-        <li><strong>Cross axis</strong> — perpendicular. Por padrão vertical.</li>
-        <li><code>flex-direction: column</code> rotaciona tudo: main vira vertical, cross vira horizontal.</li>
+        <li>Vão ficar em linha ou em coluna? <em>(flex-direction)</em></li>
+        <li>Quanto espaço entre eles? <em>(gap)</em></li>
+        <li>Encostados na esquerda? Centralizados? Espalhados? <em>(justify-content)</em></li>
+        <li>Alinhados em cima, no meio ou embaixo da bandeja? <em>(align-items)</em></li>
       </ul>
 
-      <h2>Propriedades do container</h2>
+      <h2>Os dois eixos: main e cross</h2>
+      <p>
+        Flexbox trabalha com <strong>dois eixos</strong>. Um deles é o
+        principal (o sentido em que os itens fluem), o outro é o
+        perpendicular. Quem manda no main é o <code>justify-content</code>,
+        quem manda no cross é o <code>align-items</code>.
+      </p>
+
+      <FlexAxesDiagram />
+
+      <h2>Ligando o flex (container)</h2>
+      <VisualDemo
+        title="A linha mágica: display: flex"
+        code={`.bandeja {
+  display: flex;
+  gap: 12px;       /* espaço entre os itens */
+}`}
+        preview={
+          <div style={{ display: "flex", gap: 12 }}>
+            <div style={item(1)}>1</div>
+            <div style={item(2)}>2</div>
+            <div style={item(3)}>3</div>
+          </div>
+        }
+      />
+
+      <h2>justify-content: distribuindo no eixo principal</h2>
+      {[
+        ["flex-start", "flex-start"],
+        ["center", "center"],
+        ["space-between", "space-between"],
+        ["space-around", "space-around"],
+        ["space-evenly", "space-evenly"],
+      ].map(([label, val]) => (
+        <VisualDemo
+          key={label}
+          code={`.container { display: flex; justify-content: ${val}; }`}
+          preview={
+            <div
+              style={{
+                display: "flex",
+                justifyContent: val as any,
+                background: "#f1f5f9",
+                padding: 8,
+                borderRadius: 8,
+              }}
+            >
+              <div style={item(1)}>A</div>
+              <div style={item(2, "#8b5cf6")}>B</div>
+              <div style={item(3, "#10b981")}>C</div>
+            </div>
+          }
+          stack
+        />
+      ))}
+
+      <h2>align-items: alinhando no eixo perpendicular</h2>
+      {[
+        ["flex-start", "flex-start"],
+        ["center", "center"],
+        ["flex-end", "flex-end"],
+        ["stretch", "stretch"],
+      ].map(([label, val]) => (
+        <VisualDemo
+          key={label}
+          code={`.container { display: flex; align-items: ${val}; height: 120px; }`}
+          preview={
+            <div
+              style={{
+                display: "flex",
+                alignItems: val as any,
+                height: 120,
+                gap: 8,
+                background: "#f1f5f9",
+                padding: 8,
+                borderRadius: 8,
+              }}
+            >
+              <div style={{ ...item(1), height: val === "stretch" ? "auto" : 30 }}>A</div>
+              <div
+                style={{
+                  ...item(2, "#8b5cf6"),
+                  height: val === "stretch" ? "auto" : 50,
+                }}
+              >
+                B
+              </div>
+              <div
+                style={{
+                  ...item(3, "#10b981"),
+                  height: val === "stretch" ? "auto" : 70,
+                }}
+              >
+                C
+              </div>
+            </div>
+          }
+          stack
+        />
+      ))}
+
+      <h2>O atalho que centraliza tudo (sem mistério)</h2>
+      <BeforeAfter
+        beforeLabel="❌ Antes (várias técnicas, todas chatas)"
+        afterLabel="✅ Com flex (3 linhas)"
+        before={
+          <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1.7 }}>
+            • position absolute + transform translate
+            <br />• line-height igual ao height
+            <br />• margin auto que só funciona às vezes
+            <br />• table-cell + vertical-align: middle
+          </div>
+        }
+        after={
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: 100,
+              background: "#0f172a",
+              color: "white",
+              borderRadius: 8,
+              fontWeight: 600,
+            }}
+          >
+            🎯 centralizado
+          </div>
+        }
+      />
+
       <CodeBlock
         language="css"
-        code={`.container {
+        code={`.center {
   display: flex;
-  flex-direction: row | row-reverse | column | column-reverse;
-  flex-wrap: nowrap | wrap | wrap-reverse;
-  flex-flow: row wrap;            /* shorthand de direction + wrap */
-
-  /* Distribuição no MAIN axis */
-  justify-content: flex-start | flex-end | center
-                 | space-between | space-around | space-evenly;
-
-  /* Alinhamento no CROSS axis (linha única) */
-  align-items: stretch | flex-start | flex-end | center | baseline;
-
-  /* Alinhamento de MÚLTIPLAS linhas (precisa wrap) */
-  align-content: flex-start | flex-end | center
-               | space-between | space-around | stretch;
-
-  /* Espaço entre itens (substitui margin entre vizinhos) */
-  gap: 1rem;                       /* row e column */
-  row-gap: 1rem;
-  column-gap: 2rem;
+  justify-content: center;   /* horizontal */
+  align-items: center;       /* vertical */
 }`}
       />
 
-      <h2>Propriedades do item</h2>
-      <CodeBlock
-        language="css"
-        code={`.item {
-  /* CRESCIMENTO — quanto ocupar do espaço sobrando (proporção) */
-  flex-grow: 0;        /* default = não cresce */
+      <h2>flex-direction: trocando o sentido</h2>
+      <VisualDemo
+        code={`.col { display: flex; flex-direction: column; gap: 8px; }`}
+        preview={
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, width: 120 }}>
+            <div style={item(1)}>1</div>
+            <div style={item(2, "#8b5cf6")}>2</div>
+            <div style={item(3, "#10b981")}>3</div>
+          </div>
+        }
+        stack
+      />
 
-  /* ENCOLHIMENTO — quanto ceder quando faltar espaço */
-  flex-shrink: 1;      /* default = encolhe proporcionalmente */
+      <h2>Itens: a propriedade flex</h2>
+      <p>
+        Cada item pode ganhar uma "voz" sobre quanto espaço quer. A
+        propriedade mais usada é <code>flex: 1</code> — significa
+        <em>"divida o espaço sobrando igualmente entre os itens que têm
+        flex:1"</em>.
+      </p>
 
-  /* TAMANHO BASE — antes de aplicar grow/shrink */
-  flex-basis: auto;    /* auto | 0 | 200px | 30% */
+      <VisualDemo
+        title="Sidebar fixa + conteúdo elástico (padrão clássico)"
+        code={`.layout { display: flex; gap: 12px; }
+.sidebar { flex: 0 0 120px; }   /* não cresce, não encolhe, fica em 120px */
+.main    { flex: 1; }           /* preenche o resto */`}
+        preview={
+          <div style={{ display: "flex", gap: 12 }}>
+            <div
+              style={{
+                flex: "0 0 120px",
+                background: "#1e293b",
+                color: "white",
+                padding: 16,
+                borderRadius: 6,
+                fontSize: 13,
+              }}
+            >
+              menu
+            </div>
+            <div
+              style={{
+                flex: 1,
+                background: "#f1f5f9",
+                padding: 16,
+                borderRadius: 6,
+                fontSize: 13,
+                color: "#1e293b",
+              }}
+            >
+              área principal — esticou para preencher tudo que sobrou
+            </div>
+          </div>
+        }
+      />
 
-  /* Shorthand (quase sempre use o atalho) */
-  flex: 0 1 auto;      /* default */
-  flex: 1;             /* = 1 1 0%   (ocupa o espaço sobrando) */
-  flex: auto;          /* = 1 1 auto (cresce baseado no conteúdo) */
-  flex: none;          /* = 0 0 auto (rígido) */
+      <h2>Exemplo do mundo real: header de e-commerce</h2>
+      <VisualDemo
+        title="Logo à esquerda, busca no meio, ícones à direita"
+        code={`.header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 12px 24px;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+}
+.header .search { flex: 1; }   /* busca cresce e empurra ícones pra direita */`}
+        preview={
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 24,
+              padding: "12px 16px",
+              background: "white",
+              border: "1px solid #e5e7eb",
+              borderRadius: 6,
+            }}
+          >
+            <div style={{ fontWeight: 800, fontSize: 18, color: "#ea580c" }}>SHOP</div>
+            <input
+              placeholder="🔍 buscar produtos..."
+              style={{
+                flex: 1,
+                padding: "8px 12px",
+                border: "1px solid #cbd5e1",
+                borderRadius: 6,
+                fontSize: 13,
+              }}
+              readOnly
+            />
+            <div style={{ display: "flex", gap: 12, fontSize: 18 }}>
+              <span>👤</span>
+              <span>❤️</span>
+              <span>🛒</span>
+            </div>
+          </div>
+        }
+      />
 
-  /* Alinhamento INDIVIDUAL no cross axis (sobrescreve align-items) */
-  align-self: auto | stretch | flex-start | flex-end | center;
+      <h2>Exemplo do mundo real: lista de tags que quebra linha</h2>
+      <VisualDemo
+        title="flex-wrap salva listas longas"
+        code={`.tags {
+  display: flex;
+  flex-wrap: wrap;       /* deixa quebrar em várias linhas */
+  gap: 8px;
+}
+.tag { padding: 4px 10px; background: #ede9fe; color: #6d28d9; border-radius: 999px; font-size: 12px; }`}
+        preview={
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {["react", "css", "frontend", "tailwind", "vite", "javascript", "design", "ux", "responsivo"].map(
+              (t) => (
+                <span
+                  key={t}
+                  style={{
+                    padding: "4px 10px",
+                    background: "#ede9fe",
+                    color: "#6d28d9",
+                    borderRadius: 999,
+                    fontSize: 12,
+                    fontWeight: 600,
+                  }}
+                >
+                  #{t}
+                </span>
+              )
+            )}
+          </div>
+        }
+      />
 
-  /* Reordenar visualmente (não muda o DOM) */
-  order: 0;            /* default; negativo vai para o início */
+      <h2>Exemplo do mundo real: card com botão "grudado embaixo"</h2>
+      <VisualDemo
+        title="margin-top: auto — o pequeno truque que vale ouro"
+        code={`.card {
+  display: flex;
+  flex-direction: column;
+  height: 200px;
+}
+.card button {
+  margin-top: auto;   /* empurra o botão para o fim */
 }`}
+        preview={
+          <div style={{ display: "flex", gap: 12 }}>
+            {["Plano A", "Plano B"].map((p) => (
+              <div
+                key={p}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  width: 140,
+                  height: 200,
+                  padding: 16,
+                  border: "1px solid #e5e7eb",
+                  borderRadius: 8,
+                  background: "white",
+                }}
+              >
+                <div style={{ fontWeight: 700 }}>{p}</div>
+                <p style={{ fontSize: 12, color: "#64748b", margin: "8px 0" }}>
+                  {p === "Plano A" ? "Tudo o que você precisa." : "Mais recursos avançados."}
+                </p>
+                <button
+                  style={{
+                    marginTop: "auto",
+                    padding: "8px",
+                    background: "#3b82f6",
+                    color: "white",
+                    border: 0,
+                    borderRadius: 6,
+                    fontSize: 12,
+                    fontWeight: 600,
+                  }}
+                >
+                  Assinar
+                </button>
+              </div>
+            ))}
+          </div>
+        }
       />
 
-      <h2>Padrões mais usados</h2>
+      <h2>Tabela de propriedades — o resumo prático</h2>
       <CodeBlock
         language="css"
-        code={`/* 1. Centralizar absolutamente */
-.center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100dvh;
-}
+        code={`/* No CONTAINER */
+display: flex;
+flex-direction: row | column;     /* sentido */
+flex-wrap: wrap;                  /* permite quebrar */
+gap: 1rem;                        /* espaço entre itens */
+justify-content: center | space-between | space-evenly;  /* main */
+align-items:    center | stretch | flex-end;             /* cross */
 
-/* 2. Header com logo à esquerda + menu à direita */
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-/* 3. Empurrar último item para a direita */
-.toolbar { display: flex; gap: 1rem; }
-.toolbar .right { margin-inline-start: auto; }
-
-/* 4. Cards iguais que ocupam toda a linha */
-.cards { display: flex; gap: 1rem; }
-.cards > .card { flex: 1; }
-
-/* 5. Grid responsivo "fake" com flex-wrap */
-.grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-.grid > .item { flex: 1 1 calc(33% - 1rem); min-width: 200px; }
-
-/* 6. Sidebar fixa + main flexível */
-.layout { display: flex; gap: 2rem; }
-.layout > aside { flex: 0 0 250px; }   /* fixo */
-.layout > main  { flex: 1; }           /* preenche o resto */`}
-      />
-
-      <h2>Diferença sutil: flex: 1 vs flex: auto vs width</h2>
-      <CodeBlock
-        language="css"
-        code={`/* flex: 1   = 1 1 0%
-   - basis 0% → ignora conteúdo, divide o espaço EM PROPORÇÃO IGUAL
-   - 3 itens com flex:1 viram 3 colunas iguais sempre */
-
-/* flex: auto = 1 1 auto
-   - basis auto → começa com a largura do conteúdo, depois cresce
-   - itens com mais texto ficam maiores */
-
-/* width: 200px (sem flex)
-   - basis igual a width, não cresce, não encolhe (a menos que falte espaço) */`}
-      />
-
-      <h2>gap em flex (a salvação)</h2>
-      <CodeBlock
-        language="css"
-        code={`/* Antes (era preciso negative margin truques) */
-.cards > .card { margin-right: 1rem; }
-.cards > .card:last-child { margin-right: 0; }
-
-/* Hoje: simples e funciona com wrap */
-.cards { display: flex; flex-wrap: wrap; gap: 1rem; }`}
-      />
-
-      <h2>Casos práticos</h2>
-      <CodeBlock
-        language="css"
-        code={`/* Botão com ícone alinhado verticalmente */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: .5rem;
-  padding: .5rem 1rem;
-}
-
-/* Card com footer "grudado" embaixo (mesmo com conteúdo variável) */
-.card {
-  display: flex;
-  flex-direction: column;
-  min-height: 300px;
-}
-.card .footer { margin-top: auto; }
-
-/* Lista de tags que quebra linha bonito */
-.tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: .5rem;
-}
-
-/* Holy Grail layout (header / sidebar / main / aside / footer) */
-.app {
-  display: flex;
-  flex-direction: column;
-  min-height: 100dvh;
-}
-.app > header, .app > footer { flex: 0 0 auto; }
-.app > .body {
-  display: flex;
-  flex: 1;
-}
-.app > .body > main { flex: 1; }
-.app > .body > aside { flex: 0 0 250px; }`}
+/* Nos ITENS */
+flex: 1;                          /* preenche o que sobrar */
+flex: 0 0 200px;                  /* fixo em 200px */
+align-self: flex-end;             /* só este item alinha diferente */
+order: -1;                        /* puxa pro início */
+margin-top: auto;                 /* empurra pra baixo (em coluna) */`}
       />
 
       <h2>Armadilhas comuns</h2>
-      <AlertBox type="warning" title="min-width: auto bloqueia o shrink">
-        Itens flex têm <code>min-width: auto</code> por padrão — eles
-        nunca encolhem abaixo do conteúdo. Sintoma: texto longo
-        estoura o container. Solução: <code>min-width: 0</code> no
-        item (e <code>overflow: hidden</code> ou
-        <code> text-overflow: ellipsis</code> se quiser cortar).
+      <AlertBox type="warning" title="Texto longo estoura o flex">
+        Itens flex têm <code>min-width: auto</code> por padrão — não
+        encolhem abaixo do conteúdo. Se um título longo está estourando,
+        adicione <code>min-width: 0</code> no item.
       </AlertBox>
 
-      <AlertBox type="danger" title="margin auto NÃO funciona como em block">
-        <code>margin: 0 auto</code> em flex item NÃO centraliza no
-        sentido tradicional — funciona, mas faz coisa diferente:
-        consome espaço vazio na direção. Use
-        <code> justify-content: center </code> no container.
+      <AlertBox type="danger" title="Centralizar com margin: 0 auto não funciona em flex item">
+        Em flex container, use <code>justify-content: center</code> no
+        pai. Ou então o truque da margem que existe sim mas funciona
+        diferente em flex.
       </AlertBox>
 
-      <AlertBox type="warning" title="height: 100% em coluna flex precisa do pai">
-        <code>flex-direction: column</code> + <code>height:100%</code>
-        em filho exige que o container tenha altura definida (não
-        pode ser auto). Use <code>min-height: 100dvh</code> ou
-        defina a altura explicitamente.
-      </AlertBox>
-
-      <h2>Cheat sheet</h2>
+      <h2>Resumão</h2>
       <CodeBlock
         language="css"
-        code={`/* Container */
-display: flex
-flex-direction: row | column
-flex-wrap: wrap
-gap: 1rem
-justify-content: center | space-between | space-evenly  (main)
-align-items: center | stretch                            (cross)
-align-content: center                                    (multi-line)
+        code={`/* Centralizar tudo */
+display: flex; justify-content: center; align-items: center;
 
-/* Items */
-flex: 1                  /* preenche em proporção igual */
-flex: 0 0 200px          /* fixo */
-align-self: flex-end     /* só este item */
-order: -1                /* puxa pro início */
-margin-inline-start: auto /* empurra à direita */`}
+/* Sidebar fixa + conteúdo flex */
+.sidebar { flex: 0 0 240px; }
+.main    { flex: 1; }
+
+/* Empurrar último à direita */
+.right   { margin-left: auto; }
+
+/* Lista que quebra linha */
+display: flex; flex-wrap: wrap; gap: 1rem;
+
+/* Botão grudado embaixo do card */
+.card { display: flex; flex-direction: column; }
+.card .btn { margin-top: auto; }`}
       />
     </PageContainer>
   );

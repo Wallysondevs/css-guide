@@ -1,216 +1,345 @@
 import { PageContainer } from "@/components/layout/PageContainer";
 import { CodeBlock } from "@/components/ui/CodeBlock";
 import { AlertBox } from "@/components/ui/AlertBox";
+import { VisualDemo } from "@/components/ui/VisualDemo";
+import { PositionDiagram } from "@/components/ui/Diagrams";
 
 export default function Positioning() {
   return (
     <PageContainer
-      title="Position & Z-index"
-      subtitle="static, relative, absolute, fixed, sticky — e o caos do stacking context. Onde a maioria dos bugs visuais nascem."
+      title="Position e Z-index"
+      subtitle="Tooltip, modal, badge no canto, header pegajoso, menu suspenso — tudo isso depende de uma propriedade só: position. Ela é a fonte da metade dos bugs visuais que você vai encontrar."
       difficulty="intermediario"
       timeToRead="10 min"
     >
-      <h2>Os 5 valores de position</h2>
-      <ul>
-        <li><strong>static</strong> — padrão. Segue o fluxo. Ignora <code>top/right/bottom/left/z-index</code>.</li>
-        <li><strong>relative</strong> — fica no fluxo, mas pode ser deslocado. Cria contexto para filhos absolute.</li>
-        <li><strong>absolute</strong> — sai do fluxo. Posicionado em relação ao ancestral mais próximo com <code>position</code> diferente de static.</li>
-        <li><strong>fixed</strong> — sai do fluxo. Posicionado em relação ao viewport. Não rola com a página.</li>
-        <li><strong>sticky</strong> — híbrido: relative até cruzar um threshold, depois fixed.</li>
-      </ul>
+      <h2>Os 5 valores e o que cada um significa</h2>
+      <PositionDiagram />
 
+      <h2>relative — fica no fluxo, mas pode ser empurrado</h2>
+      <VisualDemo
+        title="Empurra o elemento sem tirar do lugar 'real'"
+        code={`.box { position: relative; top: 12px; left: 20px; }
+/* Visualmente desloca, mas o ESPAÇO original continua reservado */`}
+        preview={
+          <div style={{ background: "#f1f5f9", padding: 12, borderRadius: 6 }}>
+            <div
+              style={{
+                position: "relative",
+                top: 12,
+                left: 20,
+                background: "#3b82f6",
+                color: "white",
+                padding: 8,
+                borderRadius: 4,
+                display: "inline-block",
+                fontSize: 13,
+                fontWeight: 600,
+              }}
+            >
+              empurrado 12px↓ 20px→
+            </div>
+          </div>
+        }
+      />
+
+      <h2>absolute — sai do fluxo, ancora no pai posicionado</h2>
+      <p>
+        Esta é a base de quase todo elemento "flutuante" (badge,
+        dropdown, tooltip). A regra de ouro:
+        <strong> o pai precisa ter position: relative</strong> (ou
+        absolute, fixed, sticky). Senão o filho vai parar lá longe.
+      </p>
+
+      <VisualDemo
+        title="Badge no canto de um card"
+        code={`.card { position: relative; }   /* sem isso o badge vai pra qualquer lugar */
+.badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #ef4444;
+  color: white;
+  border-radius: 999px;
+  padding: 2px 8px;
+}`}
+        preview={
+          <div
+            style={{
+              position: "relative",
+              padding: 16,
+              background: "white",
+              border: "1px solid #e5e7eb",
+              borderRadius: 8,
+              width: 180,
+              fontSize: 13,
+              color: "#0f172a",
+            }}
+          >
+            <span
+              style={{
+                position: "absolute",
+                top: -8,
+                right: -8,
+                background: "#ef4444",
+                color: "white",
+                borderRadius: 999,
+                padding: "2px 8px",
+                fontSize: 11,
+                fontWeight: 700,
+              }}
+            >
+              NOVO
+            </span>
+            Card de produto
+          </div>
+        }
+      />
+
+      <h2>fixed — preso ao viewport, não rola com a página</h2>
       <CodeBlock
         language="css"
-        code={`/* relative — dentro do fluxo, deslocado visualmente */
-.label { position: relative; top: -3px; }
-
-/* absolute — em relação ao pai posicionado */
-.tooltip-wrapper { position: relative; }
-.tooltip-wrapper .tooltip {
-  position: absolute;
-  bottom: calc(100% + .5rem);
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-/* fixed — em relação ao viewport */
+        code={`/* Banner de cookies que fica sempre visível */
 .cookie-banner {
   position: fixed;
-  inset: auto 0 0 0;     /* shorthand: top right bottom left */
-  padding: 1rem;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px;
+  background: #1e293b;
+  color: white;
 }
 
-/* sticky — gruda quando bate no threshold */
-.section-header {
+/* Botão flutuante "voltar ao topo" */
+.fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+}`}
+      />
+
+      <h2>sticky — relative que vira fixed na hora certa</h2>
+      <p>
+        O navegador trata como <code>relative</code> normalmente. Quando
+        a página rola e o elemento tenta sair de vista, ele <em>gruda</em>
+        no limite (top, bottom, etc.) e fica fixo até o pai sair junto.
+      </p>
+
+      <VisualDemo
+        title="Header de seção que gruda enquanto você lê o conteúdo"
+        description="(Imagine este preview rolando — o título cinza ficaria fixado no topo da seção)"
+        code={`.section-title {
   position: sticky;
   top: 0;
   background: white;
+  padding: 8px;
   z-index: 10;
 }`}
+        preview={
+          <div
+            style={{
+              border: "1px solid #e5e7eb",
+              borderRadius: 6,
+              maxHeight: 120,
+              overflow: "auto",
+            }}
+          >
+            <div
+              style={{
+                position: "sticky",
+                top: 0,
+                background: "#1e293b",
+                color: "white",
+                padding: 8,
+                fontWeight: 600,
+                fontSize: 13,
+                zIndex: 10,
+              }}
+            >
+              📌 Categoria: Eletrônicos
+            </div>
+            <div style={{ padding: 12, fontSize: 12, color: "#475569" }}>
+              <p>Item 1 — role para baixo no preview e veja o título grudar</p>
+              <p>Item 2</p>
+              <p>Item 3</p>
+              <p>Item 4</p>
+              <p>Item 5</p>
+              <p>Item 6</p>
+            </div>
+          </div>
+        }
       />
 
-      <h2>A propriedade inset (atalho moderno)</h2>
+      <h2>inset — atalho moderno para top/right/bottom/left</h2>
       <CodeBlock
         language="css"
-        code={`/* inset = top + right + bottom + left */
-.fill { position: absolute; inset: 0; }     /* preenche o pai */
-.modal { position: fixed; inset: 0; }       /* fullscreen */
+        code={`/* Antes */
+.modal { position: fixed; top: 0; right: 0; bottom: 0; left: 0; }
 
-/* Logical (respeita writing-mode) */
-.right { inset-inline-end: 1rem; inset-block-start: 1rem; }`}
+/* Hoje */
+.modal { position: fixed; inset: 0; }   /* preenche o viewport */
+.modal { position: fixed; inset: 16px; } /* recua 16px de cada lado */
+.modal { position: fixed; inset: auto 0 0 0; } /* só os 3 últimos */`}
       />
 
-      <h2>Stacking context (a fonte de TODOS os bugs de z-index)</h2>
+      <h2>z-index — quem fica na frente</h2>
       <p>
-        Um <strong>stacking context</strong> é um "isolamento" de z-index.
-        Elementos dentro de um contexto NUNCA podem aparecer acima ou
-        abaixo de elementos de OUTRO contexto, não importa o
-        z-index. É essencial entender o que cria um.
+        Funciona como camadas de papel empilhadas: maior número fica
+        em cima. <strong>Mas atenção:</strong> z-index só funciona em
+        elementos com <code>position</code> diferente de
+        <code> static</code>.
       </p>
 
-      <AlertBox type="info" title="O que cria um novo stacking context">
-        <ul>
-          <li>Elemento <code>html</code> (raiz).</li>
-          <li><code>position: absolute|relative</code> + <code>z-index</code> ≠ auto.</li>
-          <li><code>position: fixed</code> ou <code>sticky</code>.</li>
-          <li><code>opacity</code> &lt; 1.</li>
-          <li><code>transform</code>, <code>filter</code>, <code>perspective</code>, <code>backdrop-filter</code> ≠ none.</li>
-          <li><code>will-change</code>, <code>contain: layout|paint|strict</code>.</li>
-          <li><code>isolation: isolate</code> (a forma mais limpa).</li>
-          <li>Flex/Grid item com <code>z-index</code>.</li>
-        </ul>
+      <VisualDemo
+        code={`.atras  { position: relative; z-index: 1; }
+.frente { position: relative; z-index: 2; }`}
+        preview={
+          <div style={{ position: "relative", height: 80 }}>
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: 100,
+                height: 60,
+                background: "#3b82f6",
+                color: "white",
+                padding: 8,
+                fontSize: 12,
+                zIndex: 1,
+              }}
+            >
+              z:1 (atrás)
+            </div>
+            <div
+              style={{
+                position: "absolute",
+                top: 16,
+                left: 60,
+                width: 100,
+                height: 60,
+                background: "#ef4444",
+                color: "white",
+                padding: 8,
+                fontSize: 12,
+                zIndex: 2,
+              }}
+            >
+              z:2 (frente)
+            </div>
+          </div>
+        }
+      />
+
+      <h2>Stacking context — a fonte de TODOS os bugs de z-index</h2>
+      <AlertBox type="warning" title="O bug clássico do modal 'atrás' do header">
+        Você coloca <code>z-index: 9999</code> num modal e ele continua
+        atrás do header. Por quê? Porque o header tem
+        <code> transform </code> ou <code>opacity &lt; 1</code>, o que
+        cria um <strong>contexto isolado</strong> de empilhamento. O
+        z-index do modal só compete dentro do contexto dele.
       </AlertBox>
 
+      <p>
+        Coisas que <strong>criam um novo contexto</strong> (memorize):
+        <code> position + z-index</code>, <code>transform</code>,
+        <code> filter</code>, <code>opacity &lt; 1</code>,
+        <code> backdrop-filter</code>, <code>isolation: isolate</code>,
+        <code> will-change</code>.
+      </p>
+
       <CodeBlock
         language="css"
-        code={`/* Bug clássico: modal "atrás" do header */
-.header {
-  position: sticky;
-  top: 0;
-  transform: translateZ(0);   /* CRIOU stacking context */
-  z-index: 10;
-}
-
-.modal {
-  position: fixed;
-  z-index: 9999;              /* não adianta — está em outro contexto */
-}
-
-/* SOLUÇÃO: subir o modal para o body via portal,
-   ou usar isolation no header E garantir que o modal não tem
-   ancestral com transform/opacity. */`}
+        code={`/* A forma LIMPA de criar um contexto isolado */
+.card { isolation: isolate; }
+/* Filhos podem ter z-index sem brigar com o resto da página */`}
       />
 
-      <h2>isolation: isolate (a forma limpa)</h2>
-      <CodeBlock
-        language="css"
-        code={`/* Cria stacking context SEM efeitos colaterais (sem transform fake) */
-.card {
-  isolation: isolate;
-}
-
-/* Útil para confinar z-index de filhos sem afetar o resto da página */`}
-      />
-
-      <h2>position: sticky em detalhe</h2>
-      <CodeBlock
-        language="css"
-        code={`/* Sticky precisa de:
-   1. Um threshold (top, bottom, etc.)
-   2. Um pai SCROLLÁVEL que seja maior que o sticky */
-
-.toc {
-  position: sticky;
-  top: 1rem;
-  align-self: start;     /* CRÍTICO em flex/grid: sem isso o item estica */
-}
-
-/* Pegadinha: overflow:hidden no ANCESTRAL quebra sticky.
-   Ferramenta de debug:
-   document.querySelectorAll('*').forEach(el => {
-     const s = getComputedStyle(el);
-     if (['hidden','clip','auto','scroll'].includes(s.overflow))
-       console.log('quebra sticky:', el);
-   });  */`}
-      />
-
-      <h2>Casos práticos</h2>
-      <CodeBlock
-        language="css"
-        code={`/* 1. Badge no canto de um card */
-.card { position: relative; }
-.card .badge {
+      <h2>Exemplo do mundo real: tooltip ancorado</h2>
+      <VisualDemo
+        title="Tooltip aparece acima do botão sem deslocar nada"
+        code={`.tip-wrap { position: relative; display: inline-block; }
+.tip-wrap .tip {
   position: absolute;
-  top: .5rem;
-  right: .5rem;
-}
-
-/* 2. Modal centralizado (jeito moderno com display:grid) */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgb(0 0 0 / .5);
-  display: grid;
-  place-items: center;
-}
-
-/* 3. Header sticky com scroll-margin para âncoras */
-.section { scroll-margin-top: 5rem; }   /* compensa header de 80px */
-
-/* 4. "Footer pegajoso" quando a página é curta */
-.app {
-  display: flex;
-  flex-direction: column;
-  min-height: 100dvh;
-}
-.app main { flex: 1; }   /* empurra footer para baixo */
-
-/* 5. Aspect-ratio para vídeos responsivos (substitui padding-bottom hack) */
-.video {
-  aspect-ratio: 16 / 9;
-  width: 100%;
+  bottom: calc(100% + 8px);    /* 8px acima do botão */
+  left: 50%;
+  transform: translateX(-50%); /* centraliza */
+  background: #0f172a;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
 }`}
+        preview={
+          <div style={{ paddingTop: 36 }}>
+            <div style={{ position: "relative", display: "inline-block" }}>
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: "calc(100% + 8px)",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  background: "#0f172a",
+                  color: "white",
+                  padding: "4px 8px",
+                  borderRadius: 4,
+                  fontSize: 11,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Salvar como rascunho
+              </div>
+              <button
+                style={{
+                  background: "#3b82f6",
+                  color: "white",
+                  padding: "8px 14px",
+                  border: 0,
+                  borderRadius: 6,
+                  fontSize: 13,
+                  fontWeight: 600,
+                }}
+              >
+                💾
+              </button>
+            </div>
+          </div>
+        }
       />
 
       <h2>Armadilhas comuns</h2>
-      <AlertBox type="danger" title="z-index só funciona com position">
-        <code>z-index: 999</code> em <code>position: static</code>
-        (default) não faz nada. Sempre acompanhe com
-        <code> position: relative </code> no mínimo.
+      <AlertBox type="danger" title="z-index 999 sem position não faz NADA">
+        Por padrão, <code>position</code> é <code>static</code> — e
+        nesse modo o z-index é ignorado. Sempre adicione no mínimo
+        <code> position: relative</code>.
       </AlertBox>
 
-      <AlertBox type="warning" title="transform cria stacking context">
-        Aplicar <code>transform: translate(0)</code> num pai cria um
-        novo contexto — filhos com z-index ficam confinados a ele.
-        Usado de propósito é poderoso; por engano vira pesadelo.
-      </AlertBox>
-
-      <AlertBox type="warning" title="position:absolute SEM pai relative">
-        O elemento se posiciona em relação ao <code>html</code>
-        (viewport quando rolado para topo). Quase nunca o que você
-        quer. Sempre confirme: <em>"qual é o ancestral com
-        position?"</em>.
-      </AlertBox>
-
-      <AlertBox type="danger" title="overflow:hidden no pai mata sticky">
+      <AlertBox type="warning" title="overflow: hidden no pai mata sticky">
         Mesmo um <code>overflow-x: hidden</code> num ancestral remoto
-        é suficiente. Bug muito comum em sites com hero-banner que
-        sangram para fora.
+        derruba o sticky. Cuidado em layouts que mascaram o
+        scroll horizontal.
       </AlertBox>
 
-      <h2>Cheat sheet</h2>
+      <AlertBox type="warning" title="absolute sem pai relative voa pro corpo">
+        O elemento se posiciona em relação ao primeiro ancestral com
+        position. Se nenhum tem, vai para o <code>html</code>. Sempre
+        cheque "qual é o pai posicionado?".
+      </AlertBox>
+
+      <h2>Resumão</h2>
       <CodeBlock
         language="css"
-        code={`position: relative   /* fica no fluxo, vira ref para filhos absolute */
-position: absolute   /* sai do fluxo, em relação ao ancestor com position */
-position: fixed      /* em relação ao viewport */
-position: sticky + top: 0   /* gruda quando bate no topo */
+        code={`position: static     /* padrão — ignora top/left/z-index */
+position: relative   /* fica no fluxo, vira ref pra filhos absolute */
+position: absolute   /* sai do fluxo, ancora no pai posicionado */
+position: fixed      /* preso ao viewport */
+position: sticky + top:0   /* gruda quando bate no topo */
 
-inset: 0             /* top right bottom left = 0 */
-isolation: isolate   /* novo stacking context limpo */
+inset: 0             /* atalho de top:0 right:0 bottom:0 left:0 */
+isolation: isolate   /* cria stacking context limpo */
 
-/* z-index: use uma escala documentada (10, 20, 30...)
-   ou uma --z-modal: 1000; --z-toast: 2000; etc. */`}
+z-index NÃO funciona sem position
+transform / opacity / filter CRIAM stacking context`}
       />
     </PageContainer>
   );
